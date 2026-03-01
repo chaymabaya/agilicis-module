@@ -12,7 +12,7 @@ allowed_origins = os.getenv(
 ).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,3 +23,5 @@ app.include_router(predict_router, prefix="/api")
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "message": "AGILICIS API is running"}
+
+
