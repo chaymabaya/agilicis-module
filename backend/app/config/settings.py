@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
-
 # Get the absolute path to the backend directory
 BACKEND_DIR = Path(__file__).parent.parent.parent
 
 # Model Configuration
-MODEL_PATH = os.getenv("MODEL_PATH", str(BACKEND_DIR / "tomato_modelV2.h5"))
+# By défaut, on pointe vers le modèle Keras natif, qui évite l'erreur
+# "Unknown layer: 'TrueDivide'" liée à l'ancien fichier .h5.
+MODEL_PATH = os.getenv("MODEL_PATH", str(BACKEND_DIR / "tomato_leaf_disease_model.keras"))
 MODEL_VERSION = "1.1.0"
 IMAGE_SIZE = (224, 224)
 
