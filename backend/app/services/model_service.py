@@ -12,25 +12,41 @@ from app.utils.response_formatter import format_response
 # Load model lazily on first use instead of at import time
 model = None
 
+
 def load_model():
+    """Load the main .keras model, with a robust fallback to the .h5 model.
+
+    This is mainly to handle differences between local and Railway environments
+    (if TensorFlow cannot read the .keras file there for any reason).
+    """
+
     global model
-    if model is None:
-        try:
-            # Try loading with compile=False first (handles batch_shape compatibility issues)
-            model = tf.keras.models.load_model(MODEL_PATH, compile=False)
-            print(f"Successfully loaded model from {MODEL_PATH}")
-        except Exception as e:
-            print(f"Warning: Could not load model from {MODEL_PATH}. Error: {e}")
-            # Try fallback to V1 model if V2 fails
-            fallback_path = str(MODEL_PATH).replace("modelV2.h5", "model.h5")
-            try:
-                print(f"Attempting to load fallback model from {fallback_path}")
-                model = tf.keras.models.load_model(fallback_path, compile=False)
-                print(f"Successfully loaded fallback model")
-            except Exception as fallback_e:
-                print(f"Fallback model also failed: {fallback_e}")
-                model = None
-    return model
+    if model is not None:
+        return model
+
+    primary_path = MODEL_PATH
+    print(f"[MODEL] Attempting to load primary model from: {primary_path}")
+    try:
+        # Try loading with compile=False first (handles batch_shape compatibility issues)
+        model = tf.keras.models.load_model(primary_path, compile=False)
+        print(f"[MODEL] Successfully loaded model from {primary_path}")
+        return model
+    except Exception as e:
+        print(f"[MODEL] Warning: could not load primary model from {primary_path}. Error: {e}")
+
+    # Fallback: try tomato_modelV2.h5 in the same directory
+    from pathlib import Path
+    primary = Path(primary_path)
+    fallback_h5 = primary.with_name("tomato_modelV2.h5")
+    print(f"[MODEL] Attempting to load fallback model from: {fallback_h5}")
+    try:
+        model = tf.keras.models.load_model(str(fallback_h5), compile=False)
+        print(f"[MODEL] Successfully loaded fallback model from {fallback_h5}")
+        return model
+    except Exception as fallback_e:
+        print(f"[MODEL] Fallback model also failed: {fallback_e}")
+        model = None
+        return None
 
 class_names = [
     "Bacterial_spot",
