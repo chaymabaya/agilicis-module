@@ -15,7 +15,8 @@ if _env_model_path:
 	if not candidate.is_absolute():
 		candidate = BACKEND_DIR / candidate
 else:
-	candidate = BACKEND_DIR / "tomato_leaf_disease_model.keras"
+	# Par défaut, on utilise le modèle V2 en .h5
+	candidate = BACKEND_DIR / "tomato_modelV2.h5"
 
 MODEL_PATH = str(candidate)
 MODEL_VERSION = "1.1.0"
