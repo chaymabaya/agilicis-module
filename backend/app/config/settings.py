@@ -9,8 +9,11 @@ CURRENT_FILE_PATH = Path(__file__).resolve()
 # This is the "backend" folder (the one that contains app/, Procfile, models, ...)
 BACKEND_DIR = CURRENT_FILE_PATH.parents[2]
 
-# Load local environment variables (for development)
-load_dotenv(BACKEND_DIR / ".env.local")
+# Load local environment variables (pour le développement uniquement).
+# Sur Railway, le code tourne sous /app, on évite donc de charger
+# le fichier .env.local du repo qui forcerait MODEL_PATH.
+if not str(BACKEND_DIR).startswith("/app"):
+	load_dotenv(BACKEND_DIR / ".env.local")
 
 # Determine model path
 _env_model_path = os.getenv("MODEL_PATH")
