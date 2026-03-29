@@ -7,14 +7,6 @@ from app.utils.thresholds import get_status
 from app.utils.response_formatter import format_response
 
 
-try:
-            model = tf.keras.models.load_model(MODEL_PATH, compile=False)
-            print("Succès : Modèle chargé !")
-except Exception as e:
-            import traceback
-            print("ERREUR CRITIQUE LORS DU CHARGEMENT :")
-            print(traceback.format_exc()) # Ceci va afficher TOUT le détail de l'erreur
-            model = None
 
 
 # Load model lazily on first use instead of at import time
