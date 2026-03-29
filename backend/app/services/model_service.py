@@ -1,4 +1,6 @@
 import tensorflow as tf
+import keras
+from keras.saving import load_model as keras_load_model
 import numpy as np
 import time
 from app.config.settings import MODEL_PATH, MODEL_VERSION
@@ -14,33 +16,31 @@ model = None
 
 
 def load_model():
-    """Load the main .keras model, with a robust fallback to the .h5 model.
+    """Load the model using Keras 3 loader (works with your file format).
 
-    This is mainly to handle differences between local and Railway environments
-    (if TensorFlow cannot read the .keras file there for any reason).
+    We first try MODEL_PATH, then fall back to tomato_modelV2.h5
+    (in case MODEL_PATH pointe vers un autre fichier).
     """
 
     global model
     if model is not None:
         return model
 
-    primary_path = MODEL_PATH
+    from pathlib import Path
+    primary_path = Path(MODEL_PATH)
     print(f"[MODEL] Attempting to load primary model from: {primary_path}")
     try:
-        # Try loading with compile=False first (handles batch_shape compatibility issues)
-        model = tf.keras.models.load_model(primary_path, compile=False)
+        model = keras_load_model(str(primary_path), compile=False, safe_mode=False)
         print(f"[MODEL] Successfully loaded model from {primary_path}")
         return model
     except Exception as e:
         print(f"[MODEL] Warning: could not load primary model from {primary_path}. Error: {e}")
 
     # Fallback: try tomato_modelV2.h5 in the same directory
-    from pathlib import Path
-    primary = Path(primary_path)
-    fallback_h5 = primary.with_name("tomato_modelV2.h5")
+    fallback_h5 = primary_path.with_name("tomato_modelV2.h5")
     print(f"[MODEL] Attempting to load fallback model from: {fallback_h5}")
     try:
-        model = tf.keras.models.load_model(str(fallback_h5), compile=False)
+        model = keras_load_model(str(fallback_h5), compile=False, safe_mode=False)
         print(f"[MODEL] Successfully loaded fallback model from {fallback_h5}")
         return model
     except Exception as fallback_e:

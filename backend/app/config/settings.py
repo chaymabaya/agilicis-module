@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Resolve important paths relative to this file so it works
 # both locally and on Railway, regardless of root directory.
@@ -7,6 +8,9 @@ CURRENT_FILE_PATH = Path(__file__).resolve()
 
 # This is the "backend" folder (the one that contains app/, Procfile, models, ...)
 BACKEND_DIR = CURRENT_FILE_PATH.parents[2]
+
+# Load local environment variables (for development)
+load_dotenv(BACKEND_DIR / ".env.local")
 
 # Determine model path
 _env_model_path = os.getenv("MODEL_PATH")
@@ -19,6 +23,16 @@ else:
 	candidate = BACKEND_DIR / "tomato_modelV2.h5"
 
 MODEL_PATH = str(candidate)
+
+# Debug de chemin pour aider au déploiement (visible dans les logs)
+try:
+	print("[PATH] CURRENT_FILE_PATH:", CURRENT_FILE_PATH)
+	print("[PATH] BACKEND_DIR:", BACKEND_DIR)
+	print("[PATH] MODEL_PATH:", MODEL_PATH)
+	print("[PATH] BACKEND_DIR contents:", [p.name for p in BACKEND_DIR.iterdir()])
+except Exception as _e:
+	print("[PATH] Debug path listing failed:", _e)
+
 MODEL_VERSION = "1.1.0"
 
 IMAGE_SIZE = (224, 224)
