@@ -1,8 +1,7 @@
 import tensorflow as tf
-import keras
-from keras.saving import load_model as keras_load_model
 import numpy as np
 import time
+from pathlib import Path
 from app.config.settings import MODEL_PATH, MODEL_VERSION
 from app.utils.image_preprocessing import preprocess_image
 from app.utils.thresholds import get_status
@@ -16,21 +15,20 @@ model = None
 
 
 def load_model():
-    """Load the model using Keras 3 loader (works with your file format).
+    """Load the model using tf.keras (TensorFlow 2.16 with Keras 3).
 
-    We first try MODEL_PATH, then fall back to tomato_modelV2.h5
-    (in case MODEL_PATH pointe vers un autre fichier).
+    On essaie d'abord MODEL_PATH, puis on tombe sur tomato_modelV2.h5
+    en cas d'échec.
     """
 
     global model
     if model is not None:
         return model
 
-    from pathlib import Path
     primary_path = Path(MODEL_PATH)
     print(f"[MODEL] Attempting to load primary model from: {primary_path}")
     try:
-        model = keras_load_model(str(primary_path), compile=False, safe_mode=False)
+        model = tf.keras.models.load_model(str(primary_path), compile=False)
         print(f"[MODEL] Successfully loaded model from {primary_path}")
         return model
     except Exception as e:
@@ -40,7 +38,7 @@ def load_model():
     fallback_h5 = primary_path.with_name("tomato_modelV2.h5")
     print(f"[MODEL] Attempting to load fallback model from: {fallback_h5}")
     try:
-        model = keras_load_model(str(fallback_h5), compile=False, safe_mode=False)
+        model = tf.keras.models.load_model(str(fallback_h5), compile=False)
         print(f"[MODEL] Successfully loaded fallback model from {fallback_h5}")
         return model
     except Exception as fallback_e:
